@@ -1,5 +1,8 @@
 package uk.gov.dwp.uc.pairtest;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import thirdparty.paymentgateway.TicketPaymentServiceImpl;
 import thirdparty.seatbooking.SeatReservationServiceImpl;
 import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest;
@@ -9,11 +12,13 @@ public class TicketServiceImpl implements TicketService {
     /**
      * Should only have private methods other than the one below.
      */
-    private final int MAX_TICKETS = 20;
+    private final int MAXTICKETS = 20;
+    Logger logger = Logger.getLogger(this.getClass().getName());
 
     // Real life scenario these would be floats for security reasons
-    private final int ADULT_PRICE = 20;
-    private final int CHILD_PRICE = 10;
+    private final int ADULTPRICE = 20;
+    private final int CHILDPRICE = 10;
+    Long accountId;
 
     private int numOfTickets = 0;
     private int totalPrice;
@@ -24,18 +29,20 @@ public class TicketServiceImpl implements TicketService {
     SeatReservationServiceImpl seatReservationService;
 
     @Override
-    public void purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests)
+    public final void purchaseTickets(final Long accountId, final TicketTypeRequest... ticketTypeRequests)
             throws InvalidPurchaseException {
+        logger.setLevel(Level.OFF);
         if (accountId > 0) {
+
             this.tickets = ticketTypeRequests; // assumption that the argument can be stored in an array like this
             if (this.containsAdult(tickets)) {
-                if (this.getNumberOfTickets(tickets) <= MAX_TICKETS) {
+                if (this.calculateNumberOfTickets(tickets) <= MAXTICKETS) {
 
-                    this.totalPrice = getTotalPrice(ticketTypeRequests);
-                    ticketPaymentService.makePayment(accountId, this.totalPrice);
+                    this.totalPrice = calculateTotalPrice(ticketTypeRequests);
+                    // ticketPaymentService.makePayment(accountId, this.totalPrice);
 
-                    this.totalSeatsAllocated = getNumberOfSeats(ticketTypeRequests);
-                    seatReservationService.reserveSeat(accountId, this.totalSeatsAllocated);
+                    this.totalSeatsAllocated = calculateNumberOfSeats(ticketTypeRequests);
+                    // seatReservationService.reserveSeat(accountId, this.totalSeatsAllocated);
                 }
 
             } else {
@@ -45,7 +52,14 @@ public class TicketServiceImpl implements TicketService {
         } else {
             throw new InvalidPurchaseException();
         }
+    }
 
+    public int getPrice() {
+        return this.totalPrice;
+    }
+
+    public int getSeats() {
+        return this.totalSeatsAllocated;
     }
 
     private boolean containsAdult(TicketTypeRequest[] tickets) {
@@ -59,21 +73,24 @@ public class TicketServiceImpl implements TicketService {
         return false;
     }
 
-    private int getTotalPrice(TicketTypeRequest[] tickets) {
+    private int calculateTotalPrice(TicketTypeRequest[] tickets) {
+        logger.log(Level.INFO, "In calculateTotalPrice method");
         int totalPrice = 0;
         for (int i = 0; i < tickets.length; i++) {
+            logger.log(Level.INFO, tickets[i].getTicketType().toString());
             switch (tickets[i].getTicketType()) {
                 case CHILD:
-                    totalPrice += CHILD_PRICE * tickets[i].getNoOfTickets();
+                    totalPrice += CHILDPRICE * tickets[i].getNoOfTickets();
                     break;
                 case ADULT:
-                    totalPrice += ADULT_PRICE * tickets[i].getNoOfTickets();
+                    totalPrice += ADULTPRICE * tickets[i].getNoOfTickets();
                     break;
                 default:
                     throw new InvalidPurchaseException();
             }
 
         }
+        logger.log(Level.INFO, Integer.toString(totalPrice));
         return this.totalPrice = totalPrice;
 
     }
@@ -84,7 +101,7 @@ public class TicketServiceImpl implements TicketService {
      * I could make it return a varying value everytime its called depending on the
      * change in tickets
      */
-    private int getNumberOfTickets(TicketTypeRequest[] tickets) {
+    private int calculateNumberOfTickets(TicketTypeRequest[] tickets) {
         for (int i = 0; i < tickets.length; i++) {
             this.numOfTickets += tickets[i].getNoOfTickets();
         }
@@ -92,13 +109,14 @@ public class TicketServiceImpl implements TicketService {
 
     }
 
-    private int getNumberOfSeats(TicketTypeRequest[] tickets) {
+    private int calculateNumberOfSeats(TicketTypeRequest[] tickets) {
         int totalSeatsAllocated = 0;
         for (int i = 0; i < tickets.length; i++) {
             if (!(tickets[i].getTicketType() == TicketTypeRequest.Type.INFANT)) {
-                totalSeatsAllocated += 1;
+                totalSeatsAllocated += 1 * tickets[i].getNoOfTickets();
             }
         }
+        logger.log(Level.INFO, "out of calculateNumberOfSeats");
         return totalSeatsAllocated;
     }
 

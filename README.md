@@ -1,6 +1,8 @@
 # DWP code
 
-* Implementation of ticketService in provided file `TicketServiceImpl.java`
+**Note: The call to makepayment and reserveSeat calls are commented for unit testing**
 
-* Added test file with same file path style but with parent directory in test `testTicketServiceImpl.java`
->i.e. `uk/gov/dwp/uc/pairtest/testTicketServiceImpl.java`
+- Implementation of ticketService in provided file `TicketServiceImpl.java`
+
+- Added test file with same file path style but with parent directory in test `testTicketServiceImpl.java`
+  > i.e. `uk/gov/dwp/uc/pairtest/testTicketServiceImpl.java`

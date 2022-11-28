@@ -2,6 +2,8 @@ package uk.gov.dwp.uc.pairtest;
 
 import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest;
 import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest.Type;
+import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
+
 import static org.junit.Assert.*;
 
 import org.junit.Test;
@@ -23,7 +25,6 @@ public class testTicketServiceImpl {
 		infantTicket = new TicketTypeRequest(Type.ADULT, 2);
 
 		ticketService = new TicketServiceImpl();
-
 		ticketService.purchaseTickets(accountId, childTicket, adultTicket);
 
 		/* Test for calculations */
@@ -37,21 +38,36 @@ public class testTicketServiceImpl {
 		Long accountId = 200000L;
 		childTicket = new TicketTypeRequest(Type.CHILD, 4);
 		adultTicket = new TicketTypeRequest(Type.ADULT, 2);
-
 		infantTicket = new TicketTypeRequest(Type.ADULT, 2);
 
 		ticketService = new TicketServiceImpl();
-
 		ticketService.purchaseTickets(accountId, childTicket, adultTicket);
 
 		assertEquals(6, ticketService.getSeats());
 
 	}
 
-	@Test
-	public void whenInvalidExceptionisThrown() {
+	@Test(expected = InvalidPurchaseException.class)
+	public void testInvalidNumber() {
+		Long accountId = 23004L;
+		childTicket = new TicketTypeRequest(Type.CHILD, 2);
+		adultTicket = new TicketTypeRequest(Type.ADULT, 2);
+		infantTicket = new TicketTypeRequest(Type.INFANT, 2);
+
+		ticketService = new TicketServiceImpl();
+		ticketService.purchaseTickets(accountId, adultTicket, childTicket, infantTicket);
 
 	}
+
+	@Test
+	public void testForNoAdult() {
+
+	}
+
+	// @Test
+	// public void testForNoAdult() {
+
+	// }
 
 	// public static void main(String[] args) {
 	// Long accountId = 200000L;

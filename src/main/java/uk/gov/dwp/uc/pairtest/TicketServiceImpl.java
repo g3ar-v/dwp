@@ -95,12 +95,6 @@ public class TicketServiceImpl implements TicketService {
 
     }
 
-    /*
-     * This implementation entails that The TicketService is called everytime a user
-     * wants to make a payment
-     * I could make it return a varying value everytime its called depending on the
-     * change in tickets
-     */
     private int calculateNumberOfTickets(TicketTypeRequest[] tickets) {
         for (int i = 0; i < tickets.length; i++) {
             this.numOfTickets += tickets[i].getNoOfTickets();
@@ -111,9 +105,10 @@ public class TicketServiceImpl implements TicketService {
 
     private int calculateNumberOfSeats(TicketTypeRequest[] tickets) {
         int totalSeatsAllocated = 0;
+        final int ONE = 1;
         for (int i = 0; i < tickets.length; i++) {
             if (!(tickets[i].getTicketType() == TicketTypeRequest.Type.INFANT)) {
-                totalSeatsAllocated += 1 * tickets[i].getNoOfTickets();
+                totalSeatsAllocated += ONE * tickets[i].getNoOfTickets();
             }
         }
         logger.log(Level.INFO, "out of calculateNumberOfSeats");
